@@ -1,0 +1,23 @@
+.onyx-appmenu {
+  left:0; 
+	top:0; 
+	border-radius: 0 0 5px 0; 
+	margin-top: 0;
+	/* FIXME: consider when works more reliably */
+	/*
+	-webkit-transition-property: opacity, -webkit-tranform;
+	-webkit-transition-duration: 0.5s, 0.5s;
+	-webkit-transform: translateY(-100%);
+	*/
+}
+
+/*
+.onyx-appmenu.onyx-appmenu-open {
+	-webkit-transform: translateY(0%);
+	opacity: 1;
+}
+*/
+.onyx-appMenuScrim{
+	background-color:white;
+	opacity:0.1;
+}

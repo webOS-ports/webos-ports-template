@@ -1,0 +1,4 @@
+[submodule "webos-lib"]
+	path = webos-lib
+	url = https://github.com/webOS-ports/webos-lib.git
+	branch = master

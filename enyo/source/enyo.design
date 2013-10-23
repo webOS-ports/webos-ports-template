@@ -1,0 +1,40 @@
+{
+    "palette": [
+       {
+            "name": "Enyo",
+            "items": [
+                {
+                    "name": "enyo.Scroller",
+                    "kind": "enyo.Scroller",
+                    "description": "A scroller",
+                    "config": {
+                        "kind": "enyo.Scroller",
+                        "fit": true
+                    }
+                },
+                {
+                    "name": "enyo.Repeater",
+                    "kind": "enyo.Repeater",
+                    "description": "A repeater",
+                    "config": {
+                        "kind": "enyo.Repeater"
+                    },
+                    "options": {
+                        "isRepeater": true
+                    }
+                }
+            ]
+        }
+    ],
+    "inspector": [
+        {
+            "type": "kind",
+            "name": "enyo.Repeater",
+            "events": {
+                "onSetupItem": {
+                    "filterLevel": "useful"
+                }
+            }
+        }
+    ]
+}

@@ -1,10 +1,10 @@
 /**
 	_enyo.Animator_ is a basic animation component.  Call _play_ to start the
 	animation. The animation will run for the period (in milliseconds) specified
-	by its _duration_ property.  The _onStep_ event will fire in quick 
+	by its _duration_ property.  The _onStep_ event will fire in quick
 	succession and should be handled to do something based on the _value_
 	property.
-	
+
 	The _value_ property will progress from _startValue_ to _endValue_ during
 	the animation based on the function referenced by the _easingFunction_
 	property.  The _stop_ method may be called to manually stop an in-progress
@@ -15,6 +15,9 @@
 	function will be used to handle the event directly, without sending the
 	event to its owner or bubbling it.  The _context_ property can be used to
 	call the supplied event functions in a particular "this" context.
+
+	During animation, an <a href="#enyo.jobs">enyo.jobs</a> priority of 5 is
+	registered to defer low priority tasks.
 */
 enyo.kind({
 	name: "enyo.Animator",
@@ -22,7 +25,7 @@ enyo.kind({
 	published: {
 		//* Animation duration in milliseconds
 		duration: 350,
-		//* Value of _value_ property at the beginning of an animation 
+		//* Value of _value_ property at the beginning of an animation
 		startValue: 0,
 		//* Value of _value_ property at the end of an animation
 		endValue: 1,
@@ -30,7 +33,7 @@ enyo.kind({
 		//* This reference is destroyed when the animation ceases.
 		node: null,
 		//* Function that determines how the animation progresses from
-		//* _startValue_ to _endValue_ 
+		//* _startValue_ to _endValue_
 		easingFunction: enyo.easing.cubicOut
 	},
 	events: {
@@ -42,14 +45,18 @@ enyo.kind({
 		onStop: ""
 	},
 	//* @protected
-	constructed: function() {
-		this.inherited(arguments);
-		this._next = enyo.bind(this, "next");
-	},
-	destroy: function() {
-		this.stop();
-		this.inherited(arguments);
-	},
+	constructed: enyo.inherit(function (sup) {
+		return function() {
+			sup.apply(this, arguments);
+			this._next = this.bindSafely("next");
+		};
+	}),
+	destroy: enyo.inherit(function (sup) {
+		return function() {
+			this.stop();
+			sup.apply(this, arguments);
+		};
+	}),
 	//* @public
 	//* Plays the animation.
 	//* For convenience, _inProps_ will be mixed directly into this object.
@@ -61,6 +68,10 @@ enyo.kind({
 		}
 		this.t0 = this.t1 = enyo.now();
 		this.value = this.startValue;
+
+		// register this jobPriority to block less urgent tasks from executing
+		enyo.jobs.registerPriority(5, this.id);
+
 		this.job = true;
 		this.next();
 		return this;
@@ -100,6 +111,9 @@ enyo.kind({
 		enyo.cancelRequestAnimationFrame(this.job);
 		this.node = null;
 		this.job = null;
+
+		// unblock job queue
+		enyo.jobs.unregisterPriority(this.id);
 	},
 	shouldEnd: function() {
 		return (this.dt >= this.duration);
@@ -107,15 +121,23 @@ enyo.kind({
 	next: function() {
 		this.t1 = enyo.now();
 		this.dt = this.t1 - this.t0;
-		// time independent
-		var f = this.fraction = enyo.easedLerp(this.t0, this.duration, this.easingFunction, this.reversed);
-		this.value = this.startValue + f * (this.endValue - this.startValue);
-		if (f >= 1 || this.shouldEnd()) {
+		var args = this.easingFunction.length;
+		var f;
+
+		if (args === 1) {
+			// time independent
+			f = this.fraction = enyo.easedLerp(this.t0, this.duration, this.easingFunction, this.reversed);
+			this.value = this.startValue + f * (this.endValue - this.startValue);
+		} else {
+			this.value = enyo.easedComplexLerp(this.t0, this.duration, this.easingFunction, this.reversed,
+				this.dt, this.startValue, (this.endValue - this.startValue));
+		}
+		if (((f >= 1) && (args === 1)) || this.shouldEnd()) {
 			this.value = this.endValue;
 			this.fraction = 1;
 			this.fire("onStep");
-			this.fire("onEnd");
 			this.cancel();
+			this.fire("onEnd");
 		} else {
 			this.fire("onStep");
 			this.requestNext();

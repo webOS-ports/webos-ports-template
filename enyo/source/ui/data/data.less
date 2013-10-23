@@ -1,0 +1,60 @@
+// Vertical oriented DataList
+.enyo-data-list {
+	overflow: hidden;
+	position: relative;
+	height: 100%;
+	width: 100%;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	.active {
+		position: relative;
+		overflow: hidden;
+	}
+	.buffer {
+		height: 100%;
+		overflow: hidden;
+	}
+	.page {
+		position: absolute;
+		width: 100%;
+	}
+	&.debug {
+		.page1 {
+			background: #99CCFF;
+		}
+		.page2 {
+			background: #CC99FF;
+		}
+	}
+}
+// Horizontal oriented DataList
+.enyo-data-list {
+	&.horizontal {
+		.active {
+			white-space: nowrap;
+		}
+		.page > * {
+			display: inline-block !important;
+		}
+	}
+}
+// Vertical oriented DataGridList
+.enyo-data-grid-list {
+	.item {
+		display: block;
+		position: absolute !important;
+		-webkit-box-sizing: border-box;
+		-moz-box-sizing: border-box;
+		box-sizing: border-box;
+	}
+	&.transitions {
+		.item {
+			-webkit-transition: top 300ms ease-out, left 300ms ease-out;
+			-moz-transition: top 300ms ease-out, left 300ms ease-out;
+			-ms-transition: top 300ms ease-out, left 300ms ease-out;
+			-o-transition: top 300ms ease-out, left 300ms ease-out;
+			transition: top 300ms ease-out, left 300ms ease-out;
+		}
+	}
+}

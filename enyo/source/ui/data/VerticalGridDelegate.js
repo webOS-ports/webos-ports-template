@@ -13,8 +13,6 @@
 			and apply them to our pages individually.
 		*/
 		rendered: function (list) {
-			list.$.flyweighter.canGenerate = true;
-			this._scrollPulse = 0;
 			// get our initial sizing cached now since we should actually have
 			// bounds at this point
 			this.updateMetrics(list);
@@ -24,14 +22,13 @@
 			if (list.length) { this.reset(list); }
 		},
 		/**
-			Reset the page with the added check to ensure that we add the `transitions`
-			class if they are enabled on the list.
+			Reset the page with the added class update to the list.
 		*/
 		reset: enyo.inherit(function (sup) {
 			return function (list) {
 				sup.apply(this, arguments);
-				if (list.allowTransitions && !list.hasClass("transitions")) {
-					list.addClass("transitions");
+				if (list.hasReset && !list.hasClass("reset")) {
+					list.canAddResetClass = true;
 				}
 			};
 		}),
@@ -51,53 +48,12 @@
 		/**
 			This method generates the markup for the page content.
 		*/
-		generatePage: function (list, page, index) {
-			var dd = list.get("data"),
-				cc = list.controlsPerPage,
-				// the initial index (in the data) to start with
-				pi = cc * index,
-				// the final index of the page
-				pf = Math.min(dd.length, pi + cc),
-				sx = list.styleCache || (list.styleCache={}),
-				c  = list.$.flyweighter,
-				n  = page.node || page.hasNode(),
-				mk = "", d;
-			// set the pages index value
-			page.index = index;
-			page.start = pi;
-			page.end = pf;
-			// i is the iteration index of the child in the children's array of the page
-			// j is the iteration index of the dataset for each child
-			for (var i=0, j=pi; j<pf; ++i, ++j) {
-				d = dd.at(j);
-				// we want to keep notifications from occurring until we're done
-				// setting up
-				var b = enyo.dev.bench({name: "rebuildBindings", logging: false, average: true});
-				c.stopNotifications();
-				c.set("model", d)
-				.set("id", this.idFor(list, j), true)
-				.set("index", j)
-				.set("selected", list.isSelected(d));
-				// c.rebuildBindings();
-				c.domCssText = sx[i] || c.domCssText;
-				c.tagsValid = false;
-				c.startNotifications();
-				mk += c.generateHtml();
-				c.teardownRender();
-				b.stop();
-			}
-			// take the flyweighted content and set it to the page
-			n.innerHTML = mk;
-			// now we need to update the known metrics cached for this page if we need to
-			var mx = list.metrics.pages[index] || (list.metrics.pages[index] = {});
-			// we will need to get the actual sizes for the page
-			mx.height = this.pageHeight(list, page);
-			mx.width = this.pageWidth(list, page);
-			// if we haven't already done this, update our _default_ child size for various
-			// calculations later
-			if (!list.childSize) { this.childSize(list); }
-			this.layout(list, page);
-		},
+		generatePage: enyo.inherit(function (sup) {
+			return function (list, page) {
+				sup.apply(this, arguments);
+				this.layout(list, page);
+			};
+		}),
 		/**
 			Returns the calculated width for the given page.
 		*/
@@ -113,7 +69,7 @@
 			Retrieves the default page size.
 		*/
 		defaultPageSize: function (list) {
-			return (Math.ceil(list.controlsPerPage/list.columns) * (list.tileHeight+list.spacing));
+			return (Math.ceil(this.controlsPerPage(list)/list.columns) * (list.tileHeight+list.spacing));
 		},
 		/**
 			Calculates metric values required for the absolute positioning and scaling of
@@ -128,12 +84,12 @@
 				h  = list.minHeight;
 			// the number of columns is the ratio of the available width minus the spacing
 			// by the minimum tile width plus the spacing
-			list.columns = Math.max(Math.floor((w-s) / (m+s)), 1);
+			list.columns    = Math.max(Math.floor((w-s) / (m+s)), 1);
 			// the actual tile width is a ratio of the remaining width after all columns
 			// and spacing are accounted for and the number of columns that we know we should have
-			list.tileWidth = /*Math.floor*/((w-(s*(list.columns+1)))/list.columns);
+			list.tileWidth  = ((w-(s*(list.columns+1)))/list.columns);
 			// the actual tile height is related to the tile width
-			list.tileHeight = /*Math.floor*/(h*(list.tileWidth/m));
+			list.tileHeight = (h*(list.tileWidth/m));
 			// unfortunately this forces us to recalculate the number of controls that can
 			// be used for each page
 			this.controlsPerPage(list);
@@ -141,14 +97,25 @@
 		/**
 			The number of controls necessary to fill a page will change depending on some
 			factors such as scaling and list-size adjustments. It is a function of the calculated
-			size required (1.2 * the current boundary height) and the adjusted tile height and
+			size required (pageSizeMultiplier * the current boundary height) and the adjusted tile height and
 			spacing.
 		*/
-		controlsPerPage: function (list) {
-			var ts  = list.tileHeight+list.spacing,
-				hs  = list.boundsCache.height*1.5,
-				cp  = Math.floor(hs/ts)*list.columns;
-			list.controlsPerPage = cp;
+		controlsPerPage: enyo.inherit(function (sup) {
+			return function (list) {
+				var orig    = list._updatedControlsPerPage,
+					perPage = sup.apply(this, arguments);
+				if (orig != list._updatedControlsPerPage) {
+					// we need to adjust this value as it did not take into account
+					// the spacing or the columns
+					perPage = list.controlsPerPage = (perPage * list.columns);
+				}
+				return perPage;
+			};
+		}),
+		childSize: function (list) {
+			// currently DataGridList is only vertical
+			/*jshint -W093 */
+			return (list.childSize = (list.tileHeight + list.spacing));
 		},
 		/**
 			Takes a given page and arbitrarily positions its children according to the pre-computed
@@ -159,23 +126,27 @@
 			over every child.
 		*/
 		layout: function (list, page) {
+			if (list.canAddResetClass) {
+				list.addClass("reset");
+				delete list.canAddResetClass;
+			}
 			var cc = list.columns,
 				s  = list.spacing,
 				w  = list.tileWidth,
 				h  = list.tileHeight,
 				r  = 0,
-				n  = page.node || page.hasNode(),
-				sx = list.styleCache || (list.styleCache={}),
+				n  = page,
 				cn = n.children, co;
 			if (cn.length) {
 				for (var i=0, c; (c=cn[i]); ++i) {
 					// the column
 					co = i % cc;
-					c.style.top    = (s  + (r  * (h+s))) + "px";
-					c.style.left   = (s  + (co * (w+s))) + "px";
-					c.style.width  = (w) + "px";
-					c.style.height = (h) + "px";
-					sx[i] = c.style.cssText;
+					c.addStyles(
+						"top: "    + (s  + (r  * (h+s))) + "px; " +
+						"left: "   + (s  + (co * (w+s))) + "px; " +
+						"width: "  + (w) +                 "px; " +
+						"height: " + (h) +                 "px"
+					);
 					// check if we need to increment the row
 					if ((i+1) % cc === 0) { ++r; }
 				}
@@ -206,22 +177,27 @@
 			Delegate's resize event handler.
 		*/
 		didResize: function (list) {
+			// store the previous stats for comparative purposes
+			var prev = list.boundsCache;
+			
+			// flag the list to have its bounds updated
 			list._updateBounds = true;
-			clearTimeout(list._resizeTimerId);
-			list._resizeTimerId = setTimeout(function () {
-				list.delegate.updateMetrics(list);
-				// we need to update all of our page sizes so that the buffer can resize
-				// close to properly
-				list.metrics.pages = {};
-				list.delegate.refresh(list);
-				// find the top page
-				var mx = list.metrics.pages,
-					fi = list.$.page1.index,
-					si = list.$.page2.index,
-					tp = mx[fi].top < mx[si].top? mx[fi].top: mx[si].top;
-				// ensure that the scroller is lined up with one of our pages
-				list.$.scroller.setScrollTop(tp);
-			}, 400);
+			this.updateMetrics(list);
+			
+			// if no change it the viewport then we didn't update anything size-wise
+			// and do not need to refresh at all
+			if (
+				prev.left   === list.boundsCache.left  &&
+				prev.top    === list.boundsCache.top   &&
+				prev.width  === list.boundsCache.width &&
+				prev.height === list.boundsCache.height
+			) {
+				return;
+			}
+			
+			// it is necessary to update the content of the list according to our
+			// new sizing
+			this.refresh(list);
 		}
 	}, true);
 	enyo.DataGridList.delegates.verticalGrid = p;

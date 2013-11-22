@@ -35,33 +35,31 @@
 		__Computed Properties and enyo.Model__
 
 		Computed properties only exist for attributes of a model. Otherwise, they
-		function as you would expect from
-		[ComputedSupport](#enyo/source/kernel/mixins/ComputedSupport.js) on
-		_enyo.Object_. The only exception is that all functions in the attributes
-		schema are considered to be computed properties; these are fairly useless,
-		however, if you don't declare any dependencies that they have.
+		function just as you would expect from the [ComputedSupport
+		mixin](#enyo.ComputedSupport) on _enyo.Object_. The only exception is that
+		all functions in the attributes schema are considered to be computed
+		properties; these are fairly useless, though, unless you declare their
+		dependencies.
 
 		__Bindings__
 
-		Bindings may be applied to _enyo.Models_ with the understanding that they will
-		only be activated via changes to `attributes`.
+		Bindings may be applied to _enyo.Model_ instances with the understanding
+		that they will only be activated via changes to _attributes_.
 
 		__Observers and Notifications__
 
-		The notification system for observers works the same as it does with _enyo.Object_,
-		except that observers are only notified of changes made to properties in the _attributes_
-		hash.
+		The notification system for observers works the same as it does with
+		_enyo.Object_, except that observers are only notified of changes made to
+		properties in the _attributes_ hash.
 
 		__Events__
 
 		The events in _enyo.Model_ differ from those in
 		[enyo.Component](#enyo.Component). Instead of _bubbled_ or _waterfall_
-		events, _enyo.Model_ has _change_ and _destroy_ events
-		(enyo.RegisteredEventSupport](#enyo.RegisteredEventSupport));
-
-		To work with these events, use [addListener()](#enyo.RegisteredEventSupport::addListener),
+		events, _enyo.Model_ has _change_ and _destroy_ events.	To work with these
+		events, use the [addListener()](#enyo.RegisteredEventSupport::addListener),
 		[removeListener()](#enyo.RegisteredEventSupport::removeListener), and
-		[triggerEvent()](#enyo.RegisteredEventSupport::triggerEvent).
+		[triggerEvent()](#enyo.RegisteredEventSupport::triggerEvent) methods.
 	*/
 	enyo.kind({
 		name: "enyo.Model",
@@ -171,41 +169,48 @@
 			in the schema, it will be ignored.
 		*/
 		set: function (prop, value, force) {
-			if (!this.attributes) { return this; }
-			if (enyo.isObject(prop)) { return this.setObject(prop); }
-			var rv = this.attributes[prop],
-				ch, en;
-			if (rv && "function" == typeof rv) { return this; }
-			if (force || rv !== value) {
-				this.previous[prop] = rv;
-				if (this.computedMap) {
-					if ((en=this.computedMap[prop])) {
-						if (typeof en == "string") {
-							en = this.computedMap[prop] = enyo.trim(en).split(" ");
-						}
-						ch = {};
-						for (var i=0, p; (p=en[i]); ++i) {
-							this.attributes[prop] = rv;
-							this.previous[p] = ch[p] = this.get(p);
-							this.attributes[prop] = value;
-							this.changed[p] = this.get(p);
+			if (this.attributes) {
+				if (enyo.isObject(prop)) { return this.setObject(prop); }
+				var rv = this.attributes[prop],
+					ch, en;
+				this._updated = false;
+				if (rv && "function" == typeof rv) { return this; }
+				if (force || rv !== value) {
+					this.previous[prop] = rv;
+					if (this.computedMap) {
+						if ((en=this.computedMap[prop])) {
+							if (typeof en == "string") {
+								en = this.computedMap[prop] = enyo.trim(en).split(" ");
+							}
+							ch = {};
+							for (var i=0, p; (p=en[i]); ++i) {
+								this.attributes[prop] = rv;
+								this.previous[p] = ch[p] = this.get(p);
+								this.attributes[prop] = value;
+								this.changed[p] = this.get(p);
+								this._updated = true;
+							}
 						}
 					}
-				}
-				this.changed[prop] = this.attributes[prop] = value;
-				this.notifyObservers(prop, rv, value);
-				// if this is a dependent of a computed property we mark that
-				// as changed as well
-				if (ch) {
-					for (var k in ch) {
-						this.notifyObservers(k, this.previous[k], ch[k]);
+					this.changed[prop] = this.attributes[prop] = value;
+					this.notifyObservers(prop, rv, value);
+					this._updated = true;
+					// if this is a dependent of a computed property we mark that
+					// as changed as well
+					if (ch) {
+						for (var k in ch) {
+							this.notifyObservers(k, this.previous[k], ch[k]);
+						}
 					}
+					if (!this.isSilenced() && this._updated) {
+						// note we only clear this here if we are the ones to fire the
+						// changed event
+						this._updated = false;
+						this.triggerEvent("change");
+						this.changed = {};
+					}
+					this.dirty = true;
 				}
-				if (!this.isSilenced()) {
-					this.triggerEvent("change");
-					this.changed = {};
-				}
-				this.dirty = true;
 			}
 			return this;
 		},
@@ -215,17 +220,23 @@
 			to the _attributes_ schema when this method is used.
 		*/
 		setObject: function (props) {
-			if (!this.attributes) { return this; }
-			if (props) {
-				this.stopNotifications();
-				this.silence();
-				for (var k in props) {
-					this.set(k, props[k]);
+			if (this.attributes) {
+				if (props) {
+					this.stopNotifications();
+					this.silence();
+					var updated = false;
+					for (var k in props) {
+						this.set(k, props[k]);
+						updated = updated || this._updated;
+					}
+					this.startNotifications();
+					this.unsilence();
+					if (updated) {
+						this._updated = false;
+						this.triggerEvent("change");
+					}
+					this.changed = {};
 				}
-				this.startNotifications();
-				this.unsilence();
-				this.triggerEvent("change");
-				this.changed = {};
 			}
 			return this;
 		},
@@ -368,13 +379,15 @@
 			var r = this.parse(res);
 			if (r) {
 				this.setObject(r);
-				// once notifications have taken place we clear the dirty status so the
-				// state of the model is now clean
-				this.dirty = false;
-				if (opts) {
-					if (opts.success) {
-						opts.success(rec, opts, res);
-					}
+			}
+			// once notifications have taken place we clear the dirty status so the
+			// state of the model is now clean
+			this.dirty = false;
+			// the record can no longer be considered new
+			this.isNew = false;
+			if (opts) {
+				if (opts.success) {
+					opts.success(rec, opts, res);
 				}
 			}
 		},
@@ -387,15 +400,15 @@
 			var r = this.parse(res);
 			if (r) {
 				this.setObject(r);
-				// once notifications have taken place we clear the dirty status so the
-				// state of the model is now clean
-				this.dirty = false;
-				// since this was successful this can no longer be considered a new record
-				this.isNew = false;
-				if (opts) {
-					if (opts.success) {
-						opts.success(rec, opts, res);
-					}
+			}
+			// once notifications have taken place we clear the dirty status so the
+			// state of the model is now clean
+			this.dirty = false;
+			// since this was successful this can no longer be considered a new record
+			this.isNew = false;
+			if (opts) {
+				if (opts.success) {
+					opts.success(rec, opts, res);
 				}
 			}
 		},
@@ -403,7 +416,7 @@
 			When a record is successfully destroyed, this method is called before any
 			user-provided callbacks are executed.
 		*/
-		didDestroy: function () {
+		didDestroy: function (rec, opts, res) {
 			for (var k in this.attributes) {
 				if (this.attributes[k] instanceof enyo.Model || this.attributes[k] instanceof enyo.Collection) {
 					if (this.attributes[k].owner === this) {
@@ -424,6 +437,10 @@
 			// to avoid lingering entries
 			this.removeAllObservers();
 			this.removeAllListeners();
+
+			if (opts && opts.success) {
+				opts.success(rec, opts, res);
+			}
 		},
 		/**
 			When a record fails during a request, this method is executed with the

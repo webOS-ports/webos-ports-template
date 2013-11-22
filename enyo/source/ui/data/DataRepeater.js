@@ -1,12 +1,13 @@
 //*@public
 /**
-		_enyo.DataRepeater_ uses [enyo.Collection](#enyo.Collection) as its
-		_controller_ to repeatedly render and synchronize records (instances of
-		[enyo.Model](#enyo.Model)) to its own children. For any record in the
-		collection, a new child will be rendered in this repeater. If the record is
-		destroyed, the child will be destroyed. These controls will	automatically
-		update when properties on the underlying record are modified if they have
-		been bound using bindings (see [enyo.Binding](#enyo.Binding)).
+		_enyo.DataRepeater_ iterates over the items in an
+		[enyo.Collection](#enyo.Collection) to repeatedly render and
+		synchronize  records (instances of [enyo.Model](#enyo.Model)) to its
+		own children. For any record in the collection, a new child will be
+		rendered in this repeater. If  the record is destroyed, the child will
+		be destroyed. These controls will automatically update when the
+		properties on the underlying record are modified if they have been
+		bound using bindings (see [enyo.Binding](#enyo.Binding)).
 */
 enyo.kind({
 	name: "enyo.DataRepeater",
@@ -45,6 +46,12 @@ enyo.kind({
 	*/
 	selectionProperty: "",
 	/**
+		Set this to a space-delimited string of events or an array that can trigger
+		the selection of a particular child. By default it is simply the _ontap_
+		event. To prevent selection entirely see _selection_ and set it to `false`.
+	*/
+	selectionEvents: "ontap",
+	/**
 		Use this hash to define _defaultBindingProperties_ for _all_ children
 		(even children of children) of this repeater. This can be eliminate the
 		need to write the same paths many times. You can also use any	binding
@@ -79,6 +86,9 @@ enyo.kind({
 	constructor: enyo.inherit(function (sup) {
 		return function () {
 			this._selection = [];
+			// we need to initialize our selectionEvents array
+			var se = this.selectionEvents;
+			this.selectionEvents = (typeof se == "string"? se.split(" "): se);
 			// we need to pre-bind these methods so they can easily be added
 			// and removed as listeners later
 			var h = this._handlers = enyo.clone(this._handlers);
@@ -193,7 +203,7 @@ enyo.kind({
 		// unregister previous collections
 		var c = this.controller;
 		this.controller = undefined;
-		if (c) {
+		if (c && (!this.collection || this.collection !== c)) {
 			this.warn("the `controller` property has been deprecated, please update and use `collection` " +
 				"instead - including any bindings currently mapped directly to `controller`");
 		}
@@ -256,8 +266,19 @@ enyo.kind({
 			this.$[this.containerName].render();
 		}
 	},
+	/**
+		Calls _childForIndex()_, leaving for posterity.
+	*/
 	getChildForIndex: function (i) {
-		return this.$.container.children[i];
+		return this.childForIndex(i);
+	},
+	/**
+		Attempts to return the control representation of the data index.
+		Returns the control or undefined if it could not be found or the
+		index of out of bounds.
+	*/
+	childForIndex: function (i) {
+		return this.$.container.children[i];		
 	},
 	data: function () {
 		return this.collection;
@@ -271,8 +292,9 @@ enyo.kind({
 			r = this.collection.at(index),
 			s = this._selection, i;
 		if (this.selection) {
-			if (this.multipleSelection && (!~enyo.indexOf(r, s))) { s.push(r); }
-			else if (!~enyo.indexOf(r, s)) {
+			if (this.multipleSelection && (!~enyo.indexOf(r, s))) {
+				s.push(r);
+			} else if (!~enyo.indexOf(r, s)) {
 				while (s.length) {
 					i = this.collection.indexOf(s.pop());
 					this.deselect(i);
@@ -357,7 +379,7 @@ enyo.kind({
 			this.reset();
 		}
 	},
-	computed: {selected: [], data: ["controller"]},
+	computed: {selected: [], data: ["controller", "collection"]},
 	noDefer: true,
 	childMixins: [enyo.RepeaterChildSupport],
 	controlParentName: "container",

@@ -15,6 +15,16 @@ enyo.kind({
 	name: "enyo.DataList",
 	kind: enyo.DataRepeater,
 	/**
+		The _enyo.DataList_ kind will emit a registered event when paging, `paging`,
+		so that for per-page updates can be made when necessary. You can register for
+		this event by calling _addListener()_ for the `paging` event with a callback.
+		The callback method will be passed a reference to the _enyo.DataList_ that is
+		paging, the name of the event (`paging`), and hash with the properties `start`,
+		`end` and `action` that refer to the lowest active index in the dataset through
+		the highest active index and the action that triggered the paging respectively.
+		The `action` value can be either 'scroll' or 'reset'.
+	*/
+	/**
 		The _enyo.DataList_ kind places its rows inside of a scroller. Any
 		configurable options associated with _enyo.Scroller_ may be placed in this
 		hash and will be set accordingly on this list's scroller. If no options are
@@ -28,15 +38,27 @@ enyo.kind({
 	*/
 	orientation: "vertical",
 	/**
-		The maximum number of children to generate for each page. This property may
-		be modified as needed; some platforms perform better with larger values
-		(resulting in larger pages), and others with smaller values (resulting in
-		smaller pages). If the number of children that should be generated is
-		smaller than this value, only the number needed will be generated. For
-		collections of smaller controls, this number may need to be increased, since
-		each page should be larger than the container (so that paging is smooth).
+		This is typically handled automatically but some platforms may benefit from
+		having a larger or smaller value here. If there is a number here it will be
+		multiplied by the available viewport size (depending on orientation) to determine
+		the minimum page size. The page size is directly related to the number of controls
+		that will be generated at any given time (and subsequently needing update)
+		whenever paging occurs. This number can be any rational number greater than _1.2_.
 	*/
-	controlsPerPage: 20,
+	pageSizeMultiplier: null,
+	/**
+		To disable the default smoothing-transitions (for supported platforms) set
+		this flag to `false`.
+	*/
+	allowTransitions: true,
+	/**
+		Because some systems perform poorly on initialization there is a delay when
+		attempting to actually draw the contents of a _enyo.DataList_. Usually you
+		will not need to adjust this value (ms). If _renderDelay_ is null there will
+		be no delay and it will be executed synchronously. Note that if set to 0 it
+		will be executed asynchronously.
+	*/
+	renderDelay: 250,
 	/**
 		Completely resets the current list such that it scrolls to the top of the
 		scrollable region and regenerates all of its children. This is typically
@@ -56,36 +78,50 @@ enyo.kind({
 		internally.
 	*/
 	refresh: function () {
-		this.startJob("refreshing", function () {
+		if (this.hasRendered) {
 			this.delegate.refresh(this);
-		}, 100);
+		}
+	},
+	/**
+		Pass in an integer within the bounds of the lists's collection to have it
+		scroll to the position of that index in the list.
+	*/
+	scrollToIndex: function (idx) {
+		if (idx >= 0 && idx < this.length) {
+			this.delegate.scrollToIndex(this, idx);
+		}
 	},
 	//*@protected
 	constructor: enyo.inherit(function (sup) {
 		return function () {
 			sup.apply(this, arguments);
-			this.metrics = {};
+			this.metrics       = {};
 			this.metrics.pages = {};
+			if (this.pageSizeMultiplier !== null && !isNaN(this.pageSizeMultiplier)) {
+				this.pageSizeMultiplier = Math.max(1.2, this.pageSizeMultiplier);
+			}
 		};
 	}),
 	create: enyo.inherit(function (sup) {
 		return function () {
+			// if we can, we use transitions
+			this.allowTransitionsChanged();
 			// map the selected strategy to the correct delegate for operations
 			// on the list, default to _vertical_ if none is provided or if it
 			// could not be found
 			this.delegate = this.ctor.delegates[this.orientation] || this.base.delegates.vertical;
 			// if the delegate has an initialization routine execute it now before the
 			// container and children are rendered
-			if (this.delegate.initList) { this.delegate.initList(this); }
+			if (this.delegate.initList) {
+				this.delegate.initList(this);
+			}
 			sup.apply(this, arguments);
 			// initialize the _pages_ array and add the pages to it
 			this.pages = [this.$.page1, this.$.page2];
-			this.createChrome([{name: "flyweighter", canGenerate: false, owner: this, spotlight: false, flyweighter: true}]);
 		};
 	}),
 	render: enyo.inherit(function (sup) {
 		return function () {
-			this.$.flyweighter.canGenerate = false;
 			this.$.scroller.canGenerate = false;
 			this.$.scroller.teardownRender();
 			sup.apply(this, arguments);
@@ -106,26 +142,55 @@ enyo.kind({
 		strategy.
 	*/
 	rendered: function () {
-		// now that the base list is rendered, we can safely generate our scroller
-		this.$.scroller.canGenerate = true;
-		this.$.scroller.render();
-		// and now we hand over the action to our strategy to let it initialize the
-		// way it needs to
-		this.delegate.rendered(this);
-		this.hasRendered = true;
+		// actually rendering a datalist can be taxing for some systems so
+		// we arbitrarily delay showing for a fixed amount of time unless delay is
+		// null in which case it will be executed immediately
+		var startup = function () {
+			// now that the base list is rendered, we can safely generate our scroller
+			this.$.scroller.canGenerate = true;
+			this.$.scroller.render();
+			// and now we hand over the action to our strategy to let it initialize the
+			// way it needs to
+			this.delegate.rendered(this);
+			this.hasRendered = true;
+			// now add our class to adjust visibility (if no overridden)
+			this.addClass("rendered");
+			if (this.didRender) {
+				this.didRender();
+			}
+		};
+		if (this.renderDelay === null) {
+			startup.call(this);
+		} else {
+			this.startJob("rendering", startup, this.renderDelay);
+			// this delay will allow slower systems to keep going and get everything else
+			// on screen before worrying about setting up the list
+		}
 	},
 	/**
 		Overloaded to call a method of the delegate strategy.
 	*/
 	modelsAdded: function (c, e, props) {
-		if (c === this.collection && this.$.scroller.canGenerate) { this.delegate.modelsAdded(this, props); }
+		if (c === this.collection && this.$.scroller.canGenerate) {
+			this.delegate.modelsAdded(this, props);
+		}
 	},
 	/**
 		Overloaded to call a method of the delegate strategy.
 	*/
 	modelsRemoved: function (c, e, props) {
-		if (c === this.collection && this.$.scroller.canGenerate) { this.delegate.modelsRemoved(this, props); }
+		if (c === this.collection && this.$.scroller.canGenerate) {
+			this.delegate.modelsRemoved(this, props);
+		}
 	},
+	destroy: enyo.inherit(function (sup) {
+		return function () {
+			if (this.delegate && this.delegate.destroyList) {
+				this.delegate.destroyList(this);
+			}
+			sup.apply(this, arguments);
+		};
+	}),
 	/**
 		Overloaded from base kind to ensure that the container options correctly apply
 		the scroller options before instantiating it.
@@ -144,7 +209,9 @@ enyo.kind({
 		true Because we don't want the event to propagate beyond this kind.
 	*/
 	didScroll: function (sender, event) {
-		this.delegate.didScroll(this, event);
+		if (this.hasRendered) {
+			this.delegate.didScroll(this, event);
+		}
 		return true;
 	},
 	/**
@@ -153,18 +220,25 @@ enyo.kind({
 		we hijack the normal handler.
 	*/
 	didResize: function (sender, event) {
-		this.startJob("resizing", function () {
+		if (this.hasRendered) {
 			this.delegate.didResize(this, event);
-		}, 60);
+		}
 	},
 	/**
 		Overload to adjust the root method to be able to find the nested child
-		based on the requested index.
+		based on the requested index if its page is currently active. Will return
+		undefined if the index is out of bounds or if the control is not currently
+		available.
+	
+		Also see [getChildForIndex](#getChildForIndex) which calls this method.
 	*/
-	getChildForIndex: function (i) {
+	childForIndex: function (i) {
 		return this.delegate.childForIndex(this, i);
 	},
 	//*@protected
+	allowTransitionsChanged: function () {
+		this.addRemoveClass("transitions", this.allowTransitions);
+	},
 	/**
 		The _enyo.DataList_ kind uses an overloaded container from its base kind. We
 		set the container to a scroller and provide a way to modify the scroller
@@ -194,6 +268,8 @@ enyo.kind({
 		work we do.
 	*/
 	handlers: {onScroll: "didScroll", onresize: "didResize"},
+	//* Add the RegisteredEventSupport mixin for the paging event
+	mixins: [enyo.RegisteredEventSupport],
 	//* All delegates are named elsewhere but are stored in these statics.
 	statics: {delegates: {}},
 	//* An array of the actual _page_ references for easier access.

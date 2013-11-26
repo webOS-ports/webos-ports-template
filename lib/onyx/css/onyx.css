@@ -514,7 +514,6 @@
 /* TabBar.css */
 .onyx-tab-bar {
   width: 100%;
-  position: relative;
   z-index: 10;
   background-color: #cacaca;
   padding-top: 1px;
@@ -525,9 +524,8 @@
 .onyx-tab-bar-scroller > .enyo-thumb {
   border: 0px;
 }
-.onyx-tab-bar-scroller .enyo-touch-scroller > div {
+.onyx-tab-wrapper {
   padding: 3px 0px 3px 0px;
-  width: 100%;
 }
 .onyx-tab-line {
   position: relative;
@@ -575,7 +573,7 @@
   height: 90%;
   width: 2em;
   top: 2px;
-  right: 1em;
+  right: 19px;
   position: absolute;
   background: linear-gradient(to right, #b1b1b1 0%, rgba(177, 177, 177, 0) 100%);
   /* W3C */

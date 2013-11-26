@@ -8,7 +8,6 @@
 
 .onyx-tab-bar {
 	width: 100%;
-	position: relative;
 	z-index: 10;
 	background-color: @onyx-light-background;
 	padding-top: @tab-bar-top-clearance;
@@ -21,12 +20,10 @@
 		border: 0px;
 	}
 
-	.enyo-touch-scroller {
-		> div {
-			padding: 3px 0px 3px 0px;
-			width: 100%;
-		}
-	}
+}
+
+.onyx-tab-wrapper {
+	padding: 3px 0px 3px 0px;
 }
 
 .onyx-tab-line {

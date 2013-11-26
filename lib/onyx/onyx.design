@@ -4,41 +4,130 @@
             "name": "onyx",
             "items": [
                 {
-                    "name": "onyx.Button",
-                    "kind": "onyx.Button",
-                    "description": "A Pushbutton",
+                    "name": "Button",
+                    "description": "A pushbutton",
                     "config": {
-                        "content": "Button",
-                        "kind": "onyx.Button"
+                        "kind": "onyx.Button",
+                        "content": "Button"                        
                     }
                 },
                 {
-                    "name": "onyx.Checkbox",
-                    "kind": "onyx.Checkbox",
+                    "name": "Checkbox",
                     "description": "A checkbox",
                     "config": {
                         "kind": "onyx.Checkbox"
                     }
                 },
                 {
-                    "name": "onyx.DatePicker",
-                    "kind": "onyx.DatePicker",
-                    "description": "A control for choosing a date",
-                    "config": {
-                        "kind": "onyx.DatePicker"
-                    }
-                },
-                {
-                    "name": "onyx.Drawer",
-                    "kind": "onyx.Drawer",
+                    "name": "Drawer",
                     "description": "A drawer that opens and closes",
                     "config": {
-                        "kind": "onyx.Drawer"
+                        "kind": "onyx.Drawer",
+                        "style": "width: 600px; height: 50px;"
                     }
                 },
                 {
-                    "name": "onyx.Groupbox",
-                    "kind": "onyx.Groupbox",
+                    "name": "Grabber",
+                    "description": "Graphical 'handle' for dragging",
+                    "config": {
+                        "kind": "onyx.Grabber"
+                    }
+                },
+                {
+                    "name": "Icon",
+                    "description": "An icon",
+                    "config": {
+                        "kind": "onyx.Icon",
+                        "src": "http://enyojs.com/gallery/images/star-full.png"
+                    }
+                },
+                {
+                    "name": "IconButton",
+                    "description": "An icon button",
+                    "config": {
+                        "kind": "onyx.IconButton",
+                        "src": "http://enyojs.com/gallery/images/enyo-logo.png",
+                        "style": "width: 120px; height: 44px;"
+                    }
+                },
+                {
+                    "name": "Item",
+                    "description": "Stackable item, for lists and menus",
+                    "config": {
+                        "content": "Item",
+                        "kind": "onyx.Item"
+                    }
+                },
+                {
+                    "name": "ProgressBar",
+                    "description": "A progress bar",
+                    "config": {
+                        "kind": "onyx.ProgressBar",
+                        "progress": "10"
+                    }
+                },
+                {
+                    "name": "ProgressButton",
+                    "description": "A progress button",
+                    "config": {
+                        "kind": "onyx.ProgressButton",
+                        "progress": "10"
+                    }
+                },
+                {
+                    "name": "RangeSlider",
+                    "description": "A slider with two knobs",
+                    "config": {
+                        "kind": "onyx.RangeSlider",
+                        "rangeStart": "10",
+                        "rangeEnd": "80"
+                    }
+                },
+                {
+                    "name": "Scrim",
+                    "description": "A overlay area to prevent tap events",
+                    "config": {
+                        "kind": "onyx.Scrim"
+                    }
+                },
+                {
+                    "name": "Slider",
+                    "description": "A slider",
+                    "config": {
+                        "kind": "onyx.Slider",
+                        "value": "20"
+                    }
+                },
+                {
+                    "name": "Spinner",
+                    "description": "A spinner",
+                    "config": {
+                        "kind": "onyx.Spinner",
+                        "classes": "onyx-light"
+                    }
+                },
+                {
+                    "name": "ToggleButton",
+                    "description": "A pushbutton that toggles between active and inactive states",
+                    "config": {
+                        "kind": "onyx.ToggleButton"
+                    }
+                },
+                {
+                    "name": "ToggleIconButton",
+                    "description": "A pushbutton that toggles between active and inactive images",
+                    "config": {
+                        "kind": "onyx.ToggleIconButton",
+                        "src": "http://enyojs.com/gallery/images/star-empty.png"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "onyx-groupbox",
+            "items": [
+                {
+                    "name": "Groupbox",
                     "description": "A container for a group of controls",
                     "config": {
                         "kind": "onyx.Groupbox",
@@ -55,34 +144,21 @@
                     }
                 },
                 {
-                    "name": "onyx.GroupboxHeader",
-                    "kind": "onyx.GroupboxHeader",
+                    "name": "GroupboxHeader",
                     "description": "A header for the Groupbox",
                     "config": {
                         "content": "Header",
                         "kind": "onyx.GroupboxHeader"
                     }
-                },
+                }
+            ]
+        },
+        {
+            "name": "onyx-input",
+            "items": [
                 {
-                    "name": "onyx.Icon",
-                    "kind": "onyx.Icon",
-                    "description": "An Icon",
-                    "config": {
-                        "kind": "onyx.Icon"
-                    }
-                },
-                {
-                    "name": "onyx.IconButton",
-                    "kind": "onyx.IconButton",
-                    "description": "An IconButton",
-                    "config": {
-                        "kind": "onyx.IconButton"
-                    }
-                },
-                {
-                    "name": "onyx.InputDecorator",
-                    "kind": "onyx.InputDecorator",
-                    "description": "Style an Input",
+                    "name": "Input (Text)",
+                    "description": "Style an input",
                     "config": {
                         "kind": "onyx.InputDecorator",
                         "components": [
@@ -94,26 +170,40 @@
                     }
                 },
                 {
-                    "name": "onyx.Input",
-                    "kind": "onyx.Input",
-                    "description": "Text input control",
+                    "name": "Input (Rich Text)",
+                    "description": "Style an input",
                     "config": {
-                        "kind": "onyx.Input"
+                        "kind": "onyx.InputDecorator",
+                        "components": [
+                            {
+                                "kind": "onyx.RichText",
+                                "value": "<h3>Rich Text</h3>",
+                                "style": "width: 500px; height: 100px"
+                            }
+                        ]
                     }
                 },
                 {
-                    "name": "onyx.Item",
-                    "kind": "onyx.Item",
-                    "description": "Stackable item, for lists and menus",
+                    "name": "Input (TextArea)",
+                    "description": "Style an input",
                     "config": {
-                        "content": "Item",
-                        "kind": "onyx.Item"
+                        "kind": "onyx.InputDecorator",
+                        "components": [
+                            {
+                                "kind": "onyx.TextArea",
+                                "placeholder": "Enter text here"
+                            }
+                        ]
                     }
-                },
+                }              
+            ]
+        },
+        {
+            "name": "onyx-menu",
+            "items": [
                 {
-                    "name": "onyx.MenuDecorator",
-                    "kind": "onyx.MenuDecorator",
-                    "description": "A Menu and activating control",
+                    "name": "MenuDecorator",
+                    "description": "A menu and activating control",
                     "config": {
                         "kind": "onyx.MenuDecorator",
                         "components": [
@@ -145,9 +235,97 @@
                     }
                 },
                 {
-                    "name": "onyx.PickerDecorator",
-                    "kind": "onyx.PickerDecorator",
-                    "description": "A Picker and activating control",
+                    "name": "Menu",
+                    "description": "A menu",
+                    "config": {
+                        "kind": "onyx.Menu",
+                        "content": "Menu",
+                        "components": [
+                            {
+                                "content": "MenuItem"
+                            },
+                            {
+                                "content": "MenuItem"
+                            },
+                            {
+                                "content": "MenuItem"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "MenuItem",
+                    "description": "Stackable item for menus",
+                    "config": {
+                        "kind": "onyx.MenuItem",
+                        "content": "MenuItem"
+                    }
+                },
+                {
+                    "name": "Submenu",
+                    "description": "A sub-menu",
+                    "config": {
+                        "kind": "onyx.Submenu",
+                        "content": "Sub menu",
+                        "components": [
+                            {
+                                "content": "MenuItem"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "onyx-picker",
+            "items": [
+                {
+                    "name": "DatePicker",
+                    "description": "A control for choosing a date",
+                    "config": {
+                        "kind": "onyx.DatePicker"
+                    }
+                },
+                {
+                    "name": "Picker (Flyweight)",
+                    "description": "A control for choosing an item in a list by a flyweight pattern",
+                    "config": {
+                        "kind": "onyx.PickerDecorator",
+                        "components": [
+                            {},
+                            {
+                                "name": "itemsPicker",
+                                "kind": "onyx.FlyweightPicker",
+                                "count": 10,
+                                "onSetupItem": "setupItem",
+                                "components": [
+                                    {"name": "item"}
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Picker (Integer)",
+                    "description": "A control for picking an value from an integer range with an integer step",
+                    "config": {
+                        "kind": "onyx.PickerDecorator",
+                        "components": [
+                            {
+                                "content": "0"
+                            },
+                            {
+                                "kind": "onyx.IntegerPicker",
+                                "min": 0,
+                                "max": 25,
+                                "value": 5
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Picker (String)",
+                    "description": "A control to show a list of items to choose in a picker",
                     "config": {
                         "kind": "onyx.PickerDecorator",
                         "components": [
@@ -176,28 +354,53 @@
                     }
                 },
                 {
-                    "name": "onyx.ProgressBar",
-                    "kind": "onyx.ProgressBar",
-                    "description": "A progress bar",
+                    "name": "PickerItem",
+                    "description": "Stackable item for picker",
                     "config": {
-                        "kind": "onyx.ProgressBar"
+                        "content": "PickerItem"
                     }
                 },
                 {
-                    "name": "onyx.ProgressButton",
-                    "kind": "onyx.ProgressButton",
-                    "description": "A progress button",
+                    "name": "TimePicker",
+                    "description": "A picker for time",
                     "config": {
-                        "kind": "onyx.ProgressButton"
+                        "kind": "onyx.TimePicker"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "onyx-popup",
+            "items": [ 
+                {
+                    "name": "ContextualPopup",
+                    "description": "A contextual popup",
+                    "config": {
+                        "kind": "onyx.ContextualPopup"
                     }
                 },
                 {
-                    "name": "onyx.RadioGroup",
-                    "kind": "onyx.RadioGroup",
+                    "name": "Popup",
+                    "description": "A popup",
+                    "config": {
+                        "kind": "onyx.Popup"
+                    }
+                }                
+            ]
+        },
+        {
+            "name": "onyx-radio",
+            "items": [ 
+                {
+                    "name": "RadioGroup",
                     "description": "Only one control in a group can be 'active' at a time",
                     "config": {
                         "kind": "onyx.RadioGroup",
                         "components": [
+                            {
+                                "content": "RadioButton",
+                                "active": true
+                            },
                             {
                                 "content": "RadioButton"
                             }
@@ -205,92 +408,29 @@
                     }
                 },
                 {
-                    "name": "onyx.RadioButton",
-                    "kind": "onyx.RadioButton",
+                    "name": "RadioButton",
                     "description": "An on-off button, for use with RadioGroup",
                     "config": {
-                        "content": "Button",
+                        "content": "RadioButton",
                         "kind": "onyx.RadioButton"
                     }
-                },
+                }
+            ]
+        },
+        {
+            "name": "onyx-toolbar",
+            "items": [ 
                 {
-                    "name": "onyx.RangeSlider",
-                    "kind": "onyx.RangeSlider",
-                    "description": "A Slider with two knobs",
-                    "config": {
-                        "kind": "onyx.RangeSlider"
-                    }
-                },
-                {
-                    "name": "onyx.RichText",
-                    "kind": "onyx.RichText",
-                    "description": "A Rich text input",
-                    "config": {
-                        "kind": "onyx.RichText",
-                        "style": "height: 100px"
-                    }
-                },
-                {
-                    "name": "onyx.Slider",
-                    "kind": "onyx.Slider",
-                    "description": "A Slider",
-                    "config": {
-                        "kind": "onyx.Slider"
-                    }
-                },
-                {
-                    "name": "onyx.Spinner",
-                    "kind": "onyx.Spinner",
-                    "description": "A Spinner",
-                    "config": {
-                        "kind": "onyx.Spinner",
-                        "classes": "onyx-light"
-                    }
-                },
-                {
-                    "name": "onyx.TextArea",
-                    "kind": "onyx.TextArea",
-                    "description": "A multi-line text input",
-                    "config": {
-                        "kind": "onyx.TextArea"
-                    }
-                },
-                {
-                    "name": "onyx.TimePicker",
-                    "kind": "onyx.TimePicker",
-                    "description": "A Picker for time",
-                    "config": {
-                        "kind": "onyx.TimePicker"
-                    }
-                },
-                {
-                    "name": "onyx.ToggleButton",
-                    "kind": "onyx.ToggleButton",
-                    "description": "A pushbutton that toggles between active and inactive states",
-                    "config": {
-                        "kind": "onyx.ToggleButton"
-                    }
-                },
-                {
-                    "name": "onyx.ToggleIconButton",
-                    "kind": "onyx.ToggleIconButton",
-                    "description": "A ToggleButton that toggles between active and inactive images",
-                    "config": {
-                        "kind": "onyx.ToggleIconButton"
-                    }
-                },
-                {
-                    "name": "onyx.Toolbar",
-                    "kind": "onyx.Toolbar",
+                    "name": "Toolbar",
                     "description": "A toolbar",
                     "config": {
-                        "kind": "onyx.Toolbar"
+                        "kind": "onyx.Toolbar",
+                        "content": "Toolbar"
                     }
                 },
                 {
-                    "name": "onyx.MoreToolbar",
-                    "kind": "onyx.MoreToolbar",
-                    "description": "A toolbar which adapts to screen width ",
+                    "name": "MoreToolbar",
+                    "description": "A toolbar which adapts to screen width",
                     "config": {
                         "kind": "onyx.MoreToolbar",
                         "components": [
@@ -331,19 +471,15 @@
                             }
                         ]
                     }
-                },
+                }
+            ]
+        },
+        {
+            "name": "onyx-tooltip",
+            "items": [ 
                 {
-                    "name": "onyx.Grabber",
-                    "kind": "onyx.Grabber",
-                    "description": "Graphical 'handle' for dragging",
-                    "config": {
-                        "kind": "onyx.Grabber"
-                    }
-                },
-                {
-                    "name": "onyx.TooltipDecorator",
-                    "kind": "onyx.TooltipDecorator",
-                    "description": "Combines a conrol (typically a button) and a tooltip describing it",
+                    "name": "Tooltip (Button)",
+                    "description": "Combines a button and a tooltip describing it",
                     "config": {
                         "kind": "onyx.TooltipDecorator",
                         "components": [
@@ -357,6 +493,132 @@
                             }
                         ]
                     }
+                },
+                {
+                    "name": "Tooltip (Input)",
+                    "description": "Combines an input and a tooltip describing it",
+                    "config": {
+                        "kind": "onyx.TooltipDecorator",
+                        "components": [
+                            {
+                                "kind": "onyx.InputDecorator", 
+                                "components": [
+                                    {
+                                        "kind": "onyx.Input", 
+                                        "placeholder": "Just an input..."}
+                                ]
+                            },
+                            {
+                                "kind": "onyx.Tooltip",
+                                "content": "I'm a tooltip for a button."
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Tooltip (generic)",
+                    "description": "Combines a control and a tooltip describing it",
+                    "config": {
+                        "kind": "onyx.TooltipDecorator",
+                        "components": [
+                            {
+                                "kind": "enyo.Control"
+                            },
+                            {
+                                "kind": "onyx.Tooltip",
+                                "content": "I'm a tooltip for a button."
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "name": "ignore",
+            "items": [
+                {
+                    "name": "FlyweightPicker",
+                    "description": "A control for choosing an item in a list by a flyweight pattern", 
+                    "config": {
+                        "kind": "onyx.FlyweightPicker",
+                        "name": "itemPicker",
+                        "count": 10,
+                        "onSetupItem": "setupItem",
+                        "components": [
+                            {"name": "item"}
+                        ]
+                    }
+                },
+                {
+                    "name": "Input",
+                    "description": "Text input control",
+                    "config": {
+                        "kind": "onyx.Input",
+                        "placeholder": "Enter text here"
+                    }
+                },
+                {
+                    "name": "IntegerPicker",
+                    "description": "A control for picking an value from an integer range with an integer step", 
+                    "config": {
+                        "kind": "onyx.IntegerPicker",
+                        "min": 0,
+                        "max": 25,
+                        "value": 5
+                    }
+                },
+                {
+                    "name": "Picker",
+                    "description": "A control for choosing an item in a list", 
+                    "config": {
+                        "kind": "onyx.Picker",
+                        "components": [
+                            {
+                                "content": "Pick1",
+                                "active": true
+                            },
+                            {
+                                "content": "Pick2"
+                            },
+                            {
+                                "content": "Pick3"
+                            },
+                            {
+                                "content": "Pick4"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "PickerButton",
+                    "description": "A control to show a list of items to choose in a picker", 
+                    "config": {
+                        "kind": "onyx.PickerButton"
+                    }
+                },
+                {
+                    "name": "RichText",
+                    "description": "A rich text input",
+                    "config": {
+                        "kind": "onyx.RichText",
+                        "style": "width: 500px; height: 100px"
+                    }
+                },
+                {
+                    "name": "TextArea",
+                    "description": "A multi-line text input",
+                    "config": {
+                        "kind": "onyx.TextArea",
+                        "placeholder": "Enter text here"
+                    }
+                },
+                {
+                    "name": "Tooltip",
+                    "description": "A tooltip",
+                    "config": {
+                        "kind": "onyx.Tooltip",
+                        "content": "Tooltip"
+                    }
                 }
             ]
         }
@@ -364,19 +626,13 @@
     "inspector": [
         {
             "type": "kind",
-            "name": "onyx.RadioGroup",
+            "name": "onyx.DatePicker",
             "properties": {
-                "highlander": {
-                    "filterLevel": "useful",
-                    "inputKind": "Inspector.Config.Boolean"
+                "value": {
+                    "filterLevel": "hidden"
                 },
                 "content": {
-                    "filterLevel": "hidden"
-                }
-            },
-            "events": {
-                "ontap": {
-                    "filterLevel": "normal"
+                    "filterLevel": "dangerous"
                 }
             }
         },
@@ -425,13 +681,19 @@
         },
         {
             "type": "kind",
-            "name": "onyx.DatePicker",
+            "name": "onyx.RadioGroup",
             "properties": {
-                "value": {
-                    "filterLevel": "hidden"
+                "highlander": {
+                    "filterLevel": "useful",
+                    "inputKind": "Inspector.Config.Boolean"
                 },
                 "content": {
-                    "filterLevel": "dangerous"
+                    "filterLevel": "hidden"
+                }
+            },
+            "events": {
+                "ontap": {
+                    "filterLevel": "normal"
                 }
             }
         },

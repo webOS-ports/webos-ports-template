@@ -17,8 +17,7 @@
 		noDefer: true,
 		/**
 			The hash of named sources that are available for use on this store. The
-			default source is _ajax_, but others may be added by providing
-			_enyo.defaultStoreProperties_ with a _sources_ hash of sources to add.
+			default source is _ajax_, but others may be added by using the _addSource()_ api.
 		*/
 		sources: {ajax: "enyo.AjaxSource", jsonp: "enyo.JsonpSource"},
 		/**
@@ -333,19 +332,24 @@
 			var proto   = (typeof kind == "string"? enyo.constructorForKind(kind): kind).prototype,
 				records = this.records,
 				pkey    = proto? proto.primaryKey: "",
-				id      = opts[pkey];
+				id      = opts[pkey],
+				base;
 			// fast path search for single entry by euid, quickest way to find a record
 			if (opts.euid) {
 				return records.euid[opts.euid];
 			}
 			// if there is a provided primary key value we can use that too
 			if (id !== undefined && id !== null) {
-				return records.pk[proto.kindName][id];
+				base = records.pk[proto.kindName];
+				// we ensure an explicit undefined not a 'false' value return in cases
+				// where it could not be determined
+				return (base && base[id]) || undefined;
 			}
 			// if a kindName property exists on opts we return an array of all the records
 			// for that kind
 			if (opts.kindName) {
-				return (enyo.values(records.kn[opts.kindName])) || [];
+				base = records.kn[opts.kindName];
+				return (base && enyo.values(base)) || [];
 			}
 			// if we've gotten here lets check and see if we have a filter we need to apply
 			// to find results

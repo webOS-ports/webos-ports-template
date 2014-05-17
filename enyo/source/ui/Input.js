@@ -94,9 +94,20 @@ enyo.kind({
 		this.bubble("onDisabledChange");
 	},
 	valueChanged: function() {
-		this.setAttribute("value", this.value);
-		if (this.getNodeProperty("value", this.value) !== this.value) {
-			this.setNodeProperty("value", this.value);
+		var node = this.hasNode(),
+			attrs = this.attributes;
+		if (node) {
+			if (node.value !== this.value) {
+				node.value = this.value;
+			}
+			// we manually update the cached value so that the next time the
+			// attribute is requested or the control is re-rendered it will
+			// have the correct value - this is because calling setAttribute()
+			// in some cases does not receive an appropriate response from the
+			// browser
+			attrs.value = this.value;
+		} else {
+			this.setAttribute("value", this.value);
 		}
 	},
 	iekeyup: function(inSender, inEvent) {

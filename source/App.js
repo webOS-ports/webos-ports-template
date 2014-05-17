@@ -58,7 +58,7 @@ enyo.kind({
 		if(this.palm) {
 			var serviceCall = new enyo.webOS.ServiceRequest({service: "palm://com.palm.applicationManager", method: "launch"});
 			serviceCall.response(this, "handleBrowserLaunchResponse");
-			serviceCall.go({id: "com.palm.app.browser"});
+			serviceCall.go({id: "org.webosports.app.browser"});
 		}
 		else {
 			enyo.log("Non-palm platform");

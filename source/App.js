@@ -131,10 +131,10 @@ enyo.kind({
 		}
 	},
 	handleBackGesture: function(inSender, inEvent) {
-			this.setIndex(0);
+			this.$.ContentPanels.setIndex(0);
 	},
 	//Action Functions
 	openPanel: function(inSender, inEvent) {
-			this.setIndex(1);
+			this.$.ContentPanels.setIndex(1);
 	}
 });

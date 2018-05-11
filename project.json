@@ -31,6 +31,7 @@
         "fullscreen": "false",
         "android-installLocation": "internalOnly",
         "android-minSdkVersion": "7",
+        "android-targetSdkVersion": "None",
         "android-maxSdkVersion": "18",
         "android-windowSoftInputMode": "stateVisible",
         "splash-screen-duration": "5000",

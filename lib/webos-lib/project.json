@@ -25,13 +25,14 @@
         "device": false
       },
       "preferences": {
-        "phonegap-version": "3.0.0",
+        "phonegap-version": "2.9.0",
         "orientation": "both",
         "target-device": "universal",
         "fullscreen": "false",
         "android-installLocation": "internalOnly",
         "android-minSdkVersion": "7",
-        "android-maxSdkVersion": "18",
+        "android-targetSdkVersion": "None",
+        "android-maxSdkVersion": "",
         "android-windowSoftInputMode": "stateVisible",
         "splash-screen-duration": "5000",
         "load-url-timeout": "20000",
@@ -42,7 +43,7 @@
         "exit-on-suspend": "false",
         "show-splash-screen-spinner": "false",
         "auto-hide-splash-screen": "true",
-        "disable-cursor": "false"
+        "disable-cursor": "/icon.png"
       },
       "icon": {
         "sharedConfiguration": {
@@ -95,7 +96,9 @@
       "plugins": {},
       "access": {
         "origin": "http://127.0.0.1"
-      }
+      },
+      "targets": {},
+      "appId": ""
     }
   },
   "preview": {
